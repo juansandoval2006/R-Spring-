@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.thebestadso.innovation.dto.HttpGlobalResponseDTO;
 import com.thebestadso.innovation.dto.LoginResponseDTO;
+import com.thebestadso.innovation.dto.LoginRequestDTO;
 import com.thebestadso.innovation.dto.RegisterRequestDTO;
 import com.thebestadso.innovation.dto.UserDTO;
 import com.thebestadso.innovation.entity.Roles;
@@ -58,6 +59,35 @@ public class AuthService {
         response.setData(refresh);
 
         return response;
+    }
+
+
+    public HttpGlobalResponseDTO<LoginResponseDTO> login(LoginRequestDTO request) {
+        HttpGlobalResponseDTO<LoginResponseDTO> response = new HttpGlobalResponseDTO<>();
+        LoginResponseDTO loginResponse = new LoginResponseDTO();
+
+        try {
+            Users user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                response.setMessage("Credenciales invalidas");
+                response.setData(null);
+                return response;
+            }
+
+            String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getRolId());
+            loginResponse.setJwt(token);
+
+            response.setMessage("Login exitoso");
+            response.setData(loginResponse);
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setMessage("Credenciales invalidas");
+            response.setData(null);
+            return response;
+        }
     }
 
     public HttpGlobalResponseDTO<UserDTO> register(RegisterRequestDTO request) {

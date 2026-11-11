@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.thebestadso.innovation.dto.HttpGlobalResponseDTO;
 import com.thebestadso.innovation.dto.LoginResponseDTO;
+import com.thebestadso.innovation.dto.LoginRequestDTO;
 import com.thebestadso.innovation.dto.RegisterRequestDTO;
 import com.thebestadso.innovation.dto.UserDTO;
 import com.thebestadso.innovation.service.AuthService;
@@ -22,6 +23,17 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+
+
+    @PostMapping("login")
+    public ResponseEntity<HttpGlobalResponseDTO<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request) {
+        HttpGlobalResponseDTO<LoginResponseDTO> response = authService.login(request);
+        if (response.getData() != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 
     @PostMapping("refresh")
     public ResponseEntity<HttpGlobalResponseDTO<LoginResponseDTO>> refreshToken(HttpServletRequest request) {
